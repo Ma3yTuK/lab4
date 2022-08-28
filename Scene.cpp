@@ -1,4 +1,4 @@
-#include <Scene.h>
+#include "Scene.h"
 
 void Scene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent) {
     if (tmpPolygon) {

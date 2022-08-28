@@ -1,4 +1,4 @@
-#include <SceneView.h>
+#include "SceneView.h"
 
 void SceneView::wheelEvent(QWheelEvent *event) {
     this->setTransform(this->transform().scale(360/(360+event->angleDelta().y()), false));

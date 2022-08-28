@@ -1,14 +1,14 @@
 #ifndef SCENEVIEW_H
 #define SCENEVIEW_H
 
-#include <Scene.h>
+#include "Scene.h"
 
 class SceneView : public QGraphicsView {
     Q_OBJECT
 protected:
     void wheelEvent(QWheelEvent *event);
 public:
-    SceneView(Scene *scene, QWidget *parent = nullptr) : QGraphicsView(scene, parent) {this->setTransformationAnchor(QGraphicsView::AnchorUnderMouse);}
+    SceneView(QWidget *parent = nullptr) : QGraphicsView(parent) {this->setTransformationAnchor(QGraphicsView::AnchorUnderMouse);}
     ~SceneView() = default;
 public slots:
     void addCircle();
