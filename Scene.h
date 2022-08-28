@@ -5,7 +5,7 @@
 #include "Figures/Headers/Polyline.h"
 
 class Scene : public QGraphicsScene {
-    Q_OBJECT;
+    Q_OBJECT
 protected:
     QPointF relationPoint;
     bool transformMode;
@@ -26,7 +26,7 @@ public:
     void addRectangle(qreal a, qreal b);
     void saveImageToFile(QString path);
     void saveRowToFile(QString path);
-    void readFromFile(QString file);
+    void readFromFile(QString path);
     ~Scene() = default;
 };
 

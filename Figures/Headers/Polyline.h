@@ -5,7 +5,7 @@
 
 class Polyline : public FigureInterface {
 public:
-    Polyline(QPolygonF polygon, bool* editMode = nullptr, bool* removeMode = nullptr, QGraphicsItem *parent = nullptr);
+    Polyline(QPolygonF polygon, bool* editMode = nullptr, bool* removeMode = nullptr, QTransform Matrix = QTransform(), QGraphicsItem *parent = nullptr);
     QPointF masscenter();
     void moveVertices(QPointF startpoint, QPointF endpoint);
     void removeVertices(QPointF point);

@@ -1,9 +1,9 @@
 #include "Figures/Headers/Polygon.h"
 #include "Figures/Headers/Polyline.h"
 
-Polyline::Polyline(QPolygonF polygon, bool* editMode, bool* removeMode, QGraphicsItem *parent) :
-    FigureInterface(polygon, editMode, removeMode, parent) {
-    menu.addAction("Lenght", SLOT(getLength()));
+Polyline::Polyline(QPolygonF polygon, bool* editMode, bool* removeMode, QTransform Matrix, QGraphicsItem *parent) :
+    FigureInterface(polygon, editMode, removeMode, Matrix, parent) {
+    menu.addAction("Length", this, SLOT(getLength()));
     Polyline::applyCenter();
 }
 

@@ -7,7 +7,7 @@ class Polygon : public FigureInterface {
 protected:
     QBrush brush;
 public:
-    Polygon(QPolygonF polygon, bool* editMode = nullptr, bool* removeMode = nullptr, QGraphicsItem *parent = nullptr);
+    Polygon(QPolygonF polygon, bool* editMode = nullptr, bool* removeMode = nullptr, QTransform Matrix = QTransform(), QGraphicsItem *parent = nullptr);
     QPointF masscenter();
     void moveVertices(QPointF startpoint, QPointF endpoint);
     void removeVertices(QPointF point);

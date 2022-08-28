@@ -5,16 +5,16 @@ qreal pointfrompoint(QPointF point1, QPointF point2) {
     return qSqrt(qPow(point1.x()-point2.x(), 2) + qPow(point1.y()-point2.y(), 2));
 }
 
-FigureInterface::FigureInterface(QPolygonF polygon, bool* editMode, bool* removeMode, QGraphicsItem *parent) :
-    QGraphicsItem(parent), polygon(polygon), editMode(editMode), removeMode(removeMode) {
-    this->setFlag(QGraphicsItem::ItemIsFocusable);
+FigureInterface::FigureInterface(QPolygonF polygon, bool* editMode, bool* removeMode, QTransform Matrix, QGraphicsItem *parent) :
+    QGraphicsObject(parent), polygon(polygon), editMode(editMode), removeMode(removeMode), Matrix(Matrix) {
+    this->setFlag(QGraphicsObject::ItemIsFocusable);
 }
 
 void FigureInterface::mousePressEvent(QGraphicsSceneMouseEvent* pe) {
     if (removeMode && *removeMode)
         removeVertices(pe->pos());
     else if (pe->button() == Qt::RightButton)
-        menu.exec(pe->scenePos().toPoint());
+        menu.exec(pe->screenPos());
     else
         QGraphicsItem::mousePressEvent(pe);
 }

@@ -139,10 +139,50 @@ void Scene::addRectangle(qreal a, qreal b) {
 
 void Scene::saveImageToFile(QString path) {
     clearFocus();
-    clearSelection();
     QImage image(sceneRect().size().toSize(), QImage::Format_ARGB32);
     image.fill(Qt::transparent);
     QPainter painter(&image);
     render(&painter);
     image.save(path);
+}
+
+void Scene::saveRowToFile(QString path) {
+    QList<QGraphicsItem*> items = this->items();
+    QFile file(path);
+    file.open(QIODevice::WriteOnly);
+    QDataStream out(&file);
+    for(auto &i : items) {
+        if (dynamic_cast<Polygon*>(i)) {
+            out << qint8(0);
+        }
+        else if (dynamic_cast<Polyline*>(i)) {
+            out << qint8(1);
+        }
+        else {
+            continue;
+        }
+        FigureInterface* item = dynamic_cast<FigureInterface*>(i);
+        out << item->transform() << item->getPolygon();
+    }
+}
+
+void Scene::readFromFile(QString path) {
+    this->clear();
+    QFile file(path);
+    file.open(QIODevice::ReadOnly);
+    QDataStream in(&file);
+    while(!in.atEnd()) {
+        qint8 type;
+        QTransform Matrix;
+        QPolygonF polygon;
+        in >> type >> Matrix >> polygon;
+        if (in.status() == QDataStream::ReadCorruptData) {
+            this->clear();
+            return;
+        }
+        if (type)
+            this->addItem(new Polyline(polygon, &editMode, &removeMode, Matrix));
+        else
+            this->addItem(new Polygon(polygon, &editMode, &removeMode, Matrix));
+    }
 }

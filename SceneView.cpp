@@ -53,6 +53,18 @@ void SceneView::removeItem() {
     delete ptr;
 }
 
+void SceneView::saveImageToFile() {
+    dynamic_cast<Scene*>(this->scene())->saveImageToFile(QFileDialog::getSaveFileName(nullptr, tr("Save File"), "/data/Projects/build-Task1_4-Desktop-Debug", tr("*.jpeg")));
+}
+
+void SceneView::saveRowToFile() {
+    dynamic_cast<Scene*>(this->scene())->saveRowToFile(QFileDialog::getSaveFileName(nullptr, tr("Save File"), "/data/Projects/build-Task1_4-Desktop-Debug", tr("*.graph")));
+}
+
+void SceneView::readFromFile() {
+    dynamic_cast<Scene*>(this->scene())->readFromFile(QFileDialog::getOpenFileName(nullptr, tr("Open File"), "/data/Projects/build-Task1_4-Desktop-Debug", tr("*.graph")));
+}
+
 void SceneView::setBackgroundColor() {
     QColorDialog colorDialog;
     colorDialog.exec();

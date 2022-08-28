@@ -5,19 +5,19 @@
 
 qreal pointfrompoint(QPointF point1, QPointF point2);
 
-class FigureInterface : public QGraphicsItem {
+class FigureInterface : public QGraphicsObject {
 protected:
     QPolygonF polygon;
     QRectF boundRect;
-    QTransform Matrix;
     QMenu menu;
     bool* editMode;
     bool* removeMode;
+    QTransform Matrix;
     void mousePressEvent(QGraphicsSceneMouseEvent* pe);
     void mouseMoveEvent(QGraphicsSceneMouseEvent* pe);
     void mouseReleaseEvent(QGraphicsSceneMouseEvent* pe);
 public:
-    FigureInterface(QPolygonF polygon, bool* editMode, bool* removeMode, QGraphicsItem *parent);
+    FigureInterface(QPolygonF polygon, bool* editMode, bool* removeMode, QTransform Matrix, QGraphicsItem *parent);
     QRectF boundingRect() const {return boundRect;}
     virtual QPointF masscenter() = 0;
     void setPolygon(QPolygonF polygon) {this->polygon = polygon; update();}

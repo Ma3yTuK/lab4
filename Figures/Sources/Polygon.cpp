@@ -1,11 +1,11 @@
 #include "Figures/Headers/Polygon.h"
 #include "Figures/Headers/Polyline.h"
 
-Polygon::Polygon(QPolygonF polygon, bool* editMode, bool* removeMode, QGraphicsItem *parent) :
-    FigureInterface(polygon, editMode, removeMode, parent) {
-    menu.addAction("Square", SLOT(getS()));
-    menu.addAction("Perimetr", SLOT(getP()));
-    menu.addAction("Set brush", SLOT(setBrush()));
+Polygon::Polygon(QPolygonF polygon, bool* editMode, bool* removeMode, QTransform Matrix, QGraphicsItem *parent) :
+    FigureInterface(polygon, editMode, removeMode, Matrix, parent) {
+    menu.addAction("Square", this, SLOT(getS()));
+    menu.addAction("Perimetr", this, SLOT(getP()));
+    menu.addAction("Set brush", this, SLOT(setBrush()));
     Polygon::applyCenter();
 }
 

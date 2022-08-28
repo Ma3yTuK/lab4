@@ -4,16 +4,19 @@
 #include <Scene.h>
 
 class SceneView : public QGraphicsView {
-    Q_OBJECT;
+    Q_OBJECT
 protected:
     void wheelEvent(QWheelEvent *event);
 public:
-    SceneView(Scene *scene, QWidget *parent = nullptr) : QGraphicsView(scene, parent) {}
+    SceneView(Scene *scene, QWidget *parent = nullptr) : QGraphicsView(scene, parent) {this->setTransformationAnchor(QGraphicsView::AnchorUnderMouse);}
     ~SceneView() = default;
 public slots:
     void addCircle();
     void addRect();
     void removeItem();
+    void saveImageToFile();
+    void saveRowToFile();
+    void readFromFile();
     void setBackgroundColor();
     void paintMode(bool a);
 };
