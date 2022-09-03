@@ -1,8 +1,8 @@
 #include "SceneView.h"
 
 void SceneView::wheelEvent(QWheelEvent *event) {
-    this->setTransform(this->transform().scale(360/(360+event->angleDelta().y()), false));
-    QGraphicsView::wheelEvent(event);
+    qreal scaleFactor = 1+(qreal)event->angleDelta().y()/8/360;
+    this->setTransform(QTransform().scale(scaleFactor, scaleFactor), true);
 }
 
 void SceneView::addCircle() {
@@ -44,25 +44,19 @@ void SceneView::addRect() {
     layout->addWidget(b, 1, 1);
     layout->addWidget(button, 2, 1);
     wgt.exec();
-    ptr->addCircle(a->text().toUInt(), b->text().toDouble());
-}
-
-void SceneView::removeItem() {
-    QGraphicsItem* ptr = this->scene()->focusItem();
-    this->scene()->removeItem(ptr);
-    delete ptr;
+    ptr->addRectangle(a->text().toDouble(), b->text().toDouble());
 }
 
 void SceneView::saveImageToFile() {
-    dynamic_cast<Scene*>(this->scene())->saveImageToFile(QFileDialog::getSaveFileName(nullptr, tr("Save File"), "/data/Projects/build-Task1_4-Desktop-Debug", tr("*.jpeg")));
+    dynamic_cast<Scene*>(this->scene())->saveImageToFile(QFileDialog::getSaveFileName(nullptr, tr("Save File"), "", tr("*.png")));
 }
 
 void SceneView::saveRowToFile() {
-    dynamic_cast<Scene*>(this->scene())->saveRowToFile(QFileDialog::getSaveFileName(nullptr, tr("Save File"), "/data/Projects/build-Task1_4-Desktop-Debug", tr("*.graph")));
+    dynamic_cast<Scene*>(this->scene())->saveRowToFile(QFileDialog::getSaveFileName(nullptr, tr("Save File"), "", tr("*.graph")));
 }
 
 void SceneView::readFromFile() {
-    dynamic_cast<Scene*>(this->scene())->readFromFile(QFileDialog::getOpenFileName(nullptr, tr("Open File"), "/data/Projects/build-Task1_4-Desktop-Debug", tr("*.graph")));
+    dynamic_cast<Scene*>(this->scene())->readFromFile(QFileDialog::getOpenFileName(nullptr, tr("Open File"), "", tr("*.graph")));
 }
 
 void SceneView::setBackgroundColor() {

@@ -6,55 +6,11 @@ Polygon::Polygon(QPolygonF polygon, bool* editMode, bool* removeMode, QTransform
     menu.addAction("Square", this, SLOT(getS()));
     menu.addAction("Perimetr", this, SLOT(getP()));
     menu.addAction("Set brush", this, SLOT(setBrush()));
-    Polygon::applyCenter();
-}
-
-QPointF Polygon::masscenter() {
-    if (polygon.size()<2)
-        return QPointF();
-    QPolygonF localPolygon = this->mapToScene(polygon);
-    qreal numofpoints = localPolygon.size()-1;
-    QPointF result;
-    for (int i=0; i<numofpoints; i++) {
-        result+=localPolygon[i];
-    }
-    return result/=numofpoints;
-}
-
-void Polygon::moveVertices(QPointF startpoint, QPointF endpoint) {
-    if (polygon.size()<2)
-        return;
-    int numofpoints = polygon.size()-1;
-    int closestindex = 0;
-    int xmax, xmin, ymax, ymin;
-    xmax = xmin = endpoint.x();
-    ymax = ymin = endpoint.y();
-    qreal closest = pointfrompoint(polygon[0], startpoint);
-    for (int i=0; i<numofpoints; i++) {
-        if (closest > pointfrompoint(polygon[i], startpoint)) {
-            closest = pointfrompoint(polygon[i], startpoint);
-            closestindex = i;
-        }
-        if (polygon[i].x()<xmin)
-            xmin = polygon[i].x();
-        if (polygon[i].x()>xmax)
-            xmax = polygon[i].x();
-        if (polygon[i].y()>ymax)
-            ymax = polygon[i].y();
-        if (polygon[i].y()<ymin)
-            ymin = polygon[i].y();
-    }
-    if (!closestindex)
-        polygon[numofpoints]=endpoint;
-    polygon[closestindex] = endpoint;
-    prepareGeometryChange();
-    boundRect = QRect(xmin-10, ymin-10, xmax-xmin+20, ymax-ymin+20);
 }
 
 void Polygon::removeVertices(QPointF point) {
     QGraphicsScene* scene = this->scene();
-    if (polygon.size()>3) {
-        polygon.pop_back();
+    if (polygon.size()>2) {
         int numofpoints = polygon.size();
         int closestindex = 0;
         qreal closest = pointfrompoint(polygon[0], point);
@@ -66,42 +22,26 @@ void Polygon::removeVertices(QPointF point) {
         }
         QPolygonF newPolygon;
         for (int i = 0; i<numofpoints-1; i++)
-            newPolygon[i] = polygon[(i+1+closestindex)%numofpoints];
-        FigureInterface* tmp = new Polyline(newPolygon, editMode, removeMode);
+            newPolygon.push_back(polygon[(i+1+closestindex)%numofpoints]);
+        FigureInterface* tmp = new Polyline(newPolygon, editMode, removeMode, Matrix);
         tmp->setTransform(this->transform());
         tmp->applyTransform();
-        tmp->applyCenter();
         scene->addItem(tmp);
     }
     scene->removeItem(this);
     delete this;
 }
 
-// sets item's local coordinate center to it masscenter (for rotate and resize to work correctly)
-void Polygon::applyCenter() {
-    if (polygon.size()<2)
-        return;
-    qreal numofpoints = polygon.size()-1;
-    QPointF center;
-    for (int i=0; i<numofpoints; i++)
-        center+=polygon[i];
-    center/=numofpoints;
-    polygon.translate(-center);
-    Matrix = QTransform().translate(center.x(), center.y())*Matrix;
-    this->setTransform(Matrix, false);
-    recalculateBound();
-}
-
 void Polygon::paint(QPainter*  ppainter, const QStyleOptionGraphicsItem*, QWidget*) {
-    if (hasFocus())
-        ppainter->setPen(Qt::yellow);
+    ppainter->setPen(pen);
     ppainter->setBrush(brush);
-    ppainter->drawPolyline(polygon);
+    ppainter->drawPolygon(polygon);
 }
 
 void Polygon::setBrush() {
     QColorDialog colorDialog;
     colorDialog.exec();
+    brush.setStyle(Qt::SolidPattern);
     brush.setColor(colorDialog.selectedColor());
     update();
 }
@@ -121,7 +61,7 @@ bool lineishigher(QPointF L, QPointF a, QPointF b) {
 //returns how many times vertical line polygon[pointindex].x() crosses other
 //edges of polygon under polygon[pointindex].y() coordinate (for next function)
 int vertundercrossings (QPolygonF polygon, int pointindex, bool position = false) {
-    int numofpoints = polygon.size()-1;
+    int numofpoints = polygon.size();
     int result=0;
     qreal currentjx, currentjy, lastjy, lastjx, xvalue, yvalue, maxv, minv;
     xvalue = polygon[pointindex].x();
@@ -168,7 +108,7 @@ int vertundercrossings (QPolygonF polygon, int pointindex, bool position = false
 // square function
 void Polygon::getS() {
     QPolygonF scenePolygon = this->mapToScene(polygon);
-    int numofpoints = scenePolygon.size()-1;
+    int numofpoints = scenePolygon.size();
     qreal result = 0;
     for (int i=0; i<numofpoints; i++) {
         if (!(vertundercrossings(scenePolygon, i)%2))
@@ -176,19 +116,17 @@ void Polygon::getS() {
         else
             result-=qAbs((scenePolygon[(i+1)%numofpoints].x()-scenePolygon[i].x()))*(scenePolygon[i].y()+scenePolygon[(i+1)%numofpoints].y())/2;
     }
-    QMessageBox box;
-    box.setText(QString::number(result));
-    box.exec();
+    window.setText(QString("Square: ")+QString::number(result));
+    window.exec();
 }
 
 //perimetr function
 void Polygon::getP() {
     QPolygonF scenePolygon = this->mapToScene(polygon);
-    int numofpoints = scenePolygon.size()-1;
+    int numofpoints = scenePolygon.size();
     qreal result = 0;
     for (int i=0; i<numofpoints; i++)
         result += pointfrompoint(scenePolygon[(i+1)%numofpoints], scenePolygon[i]);
-    QMessageBox box;
-    box.setText(QString::number(result));
-    box.exec();
+    window.setText(QString("Perimetr: ")+QString::number(result));
+    window.exec();
 }

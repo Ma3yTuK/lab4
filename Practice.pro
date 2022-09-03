@@ -12,6 +12,7 @@ SOURCES += \
     Figures/Sources/FigureInterface.cpp \
     Figures/Sources/Polygon.cpp \
     Figures/Sources/Polyline.cpp \
+    Figures/Sources/RelationPoint.cpp \
     Scene.cpp \
     SceneView.cpp \
     main.cpp \
@@ -21,7 +22,10 @@ HEADERS += \
     Figures/Headers/FigureInterface.h \
     Figures/Headers/Polygon.h \
     Figures/Headers/Polyline.h \
+    Figures/Headers/RelationPoint.h \
     Figures/figureInterface.h \
+    PopUpWindow.h \
+    RClickMenu.h \
     Scene.h \
     SceneView.h \
     mainwindow.h

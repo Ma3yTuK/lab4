@@ -4,47 +4,7 @@
 Polyline::Polyline(QPolygonF polygon, bool* editMode, bool* removeMode, QTransform Matrix, QGraphicsItem *parent) :
     FigureInterface(polygon, editMode, removeMode, Matrix, parent) {
     menu.addAction("Length", this, SLOT(getLength()));
-    Polyline::applyCenter();
-}
-
-QPointF Polyline::masscenter() {
-    if (!polygon.size())
-        return QPointF();
-    QPolygonF localPolygon = this->mapToScene(polygon);
-    qreal numofpoints = localPolygon.size();
-    QPointF result;
-    for (int i=0; i<numofpoints; i++) {
-        result+=localPolygon[i];
-    }
-    return result/=numofpoints;
-}
-
-void Polyline::moveVertices(QPointF startpoint, QPointF endpoint) {
-    if (!polygon.size())
-        return;
-    int numofpoints = polygon.size();
-    int closestindex = 0;
-    int xmax, xmin, ymax, ymin;
-    xmax = xmin = endpoint.x();
-    ymax = ymin = endpoint.y();
-    qreal closest = pointfrompoint(polygon[0], startpoint);
-    for (int i=0; i<numofpoints; i++) {
-        if (closest > pointfrompoint(polygon[i], startpoint)) {
-            closest = pointfrompoint(polygon[i], startpoint);
-            closestindex = i;
-        }
-        if (polygon[i].x()<xmin)
-            xmin = polygon[i].x();
-        if (polygon[i].x()>xmax)
-            xmax = polygon[i].x();
-        if (polygon[i].y()>ymax)
-            ymax = polygon[i].y();
-        if (polygon[i].y()<ymin)
-            ymin = polygon[i].y();
-    }
-    polygon[closestindex] = endpoint;
-    prepareGeometryChange();
-    boundRect = QRect(xmin-10, ymin-10, xmax-xmin+20, ymax-ymin+20);
+    menu.addAction("Connect", this, SLOT(toPolygon()));
 }
 
 void Polyline::removeVertices(QPointF point) {
@@ -67,17 +27,15 @@ void Polyline::removeVertices(QPointF point) {
         polygon.pop_back();
         FigureInterface* tmp;
         if (newPolygon.size()>1) {
-            tmp = new Polyline(newPolygon, editMode, removeMode);
+            tmp = new Polyline(newPolygon, editMode, removeMode, Matrix);
             tmp->setTransform(this->transform());
             tmp->applyTransform();
-            tmp->applyCenter();
             scene->addItem(tmp);
         }
         if (polygon.size()>1) {
-            tmp = new Polyline(polygon, editMode, removeMode);
+            tmp = new Polyline(polygon, editMode, removeMode, Matrix);
             tmp->setTransform(this->transform());
             tmp->applyTransform();
-            tmp->applyCenter();
             scene->addItem(tmp);
         }
     }
@@ -85,24 +43,8 @@ void Polyline::removeVertices(QPointF point) {
     delete this;
 }
 
-// sets item's local coordinate center to it masscenter (for rotate and resize to work correctly)
-void Polyline::applyCenter() {
-    if (!polygon.size())
-        return;
-    qreal numofpoints = polygon.size();
-    QPointF center;
-    for (int i=0; i<numofpoints; i++)
-        center+=polygon[i];
-    center/=numofpoints;
-    polygon.translate(-center);
-    Matrix = QTransform().translate(center.x(), center.y())*Matrix;
-    this->setTransform(Matrix, false);
-    recalculateBound();
-}
-
-void Polyline::paint(QPainter*  ppainter, const QStyleOptionGraphicsItem*, QWidget*) {
-    if (hasFocus())
-        ppainter->setPen(Qt::yellow);
+void Polyline::paint(QPainter* ppainter, const QStyleOptionGraphicsItem*, QWidget*) {
+    ppainter->setPen(pen);
     ppainter->drawPolyline(polygon);
 }
 
@@ -113,7 +55,14 @@ void Polyline::getLength() {
     qreal result = 0;
     for (int i=0; i<numofpoints; i++)
         result += pointfrompoint(scenePolygon[(i+1)%numofpoints], scenePolygon[i]);
-    QMessageBox box;
-    box.setText(QString::number(result));
-    box.exec();
+    window.setText(QString::number(result));
+    window.exec();
+}
+
+void Polyline::toPolygon() {
+    if (polygon.size()>2) {
+        scene()->addItem(new Polygon(polygon, editMode, removeMode, Matrix));
+        scene()->removeItem(this);
+        deleteLater();
+    }
 }

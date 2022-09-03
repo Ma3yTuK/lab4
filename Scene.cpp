@@ -8,6 +8,12 @@ void Scene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent) {
         tmp.push_back(mouseEvent->scenePos());
         tmp.push_back(mouseEvent->scenePos());
         tmpPolygon->setPolygon(tmp);
+        return;
+    }
+    if (setPointMode) {
+        relationPoint->setRelationPoint(mouseEvent->scenePos());
+        setPointMode = false;
+        return;
     }
     transformMode = rotateMode = scaleMode = false;
     QGraphicsScene::mousePressEvent(mouseEvent);
@@ -19,15 +25,14 @@ void Scene::focusOutEvent(QFocusEvent *focusEvent) {
         if (tmp.size()>2) {
             tmp.pop_back();
             tmpPolygon->setPolygon(tmp);
-            tmpPolygon->applyCenter();
             tmpPolygon = new Polyline(QPolygonF(), &editMode, &removeMode);
+            this->addItem(tmpPolygon);
         }
         else {
             tmpPolygon->setPolygon(QPolygonF());
         }
-        return;
     }
-    transformMode = rotateMode = scaleMode = editMode = removeMode = false;
+    transformMode = rotateMode = scaleMode = editMode = removeMode = setPointMode = false;
     QGraphicsScene::focusOutEvent(focusEvent);
 }
 
@@ -37,27 +42,30 @@ void Scene::keyPressEvent(QKeyEvent *keyEvent) {
         if (tmp.size()>2) {
             tmp.pop_back();
             tmpPolygon->setPolygon(tmp);
-            tmpPolygon->applyCenter();
             tmpPolygon = new Polyline(QPolygonF(), &editMode, &removeMode);
+            this->addItem(tmpPolygon);
         }
         else {
             tmpPolygon->setPolygon(QPolygonF());
         }
         return;
     }
-    if (transformMode || rotateMode || scaleMode || editMode || removeMode)
+    if (transformMode || rotateMode || scaleMode || editMode || removeMode || setPointMode) {
+        transformMode = rotateMode = scaleMode = editMode = removeMode = setPointMode = false;
         return;
+    }
+    QGraphicsItem* tmp = focusItem();
     switch (keyEvent->key()) {
     case Qt::Key_G:
-        if (dynamic_cast<FigureInterface*>(this->focusItem()))
+        if (dynamic_cast<FigureInterface*>(tmp))
             transformMode = true;
         break;
     case Qt::Key_R:
-        if (dynamic_cast<FigureInterface*>(this->focusItem()))
+        if (dynamic_cast<FigureInterface*>(tmp))
             rotateMode = true;
         break;
     case Qt::Key_S:
-        if (dynamic_cast<FigureInterface*>(this->focusItem()))
+        if (dynamic_cast<FigureInterface*>(tmp))
             scaleMode = true;
         break;
     case Qt::Key_E:
@@ -65,6 +73,15 @@ void Scene::keyPressEvent(QKeyEvent *keyEvent) {
         break;
     case Qt::Key_D:
         removeMode = true;
+        break;
+    case Qt::Key_X:
+        if(tmp) {
+            removeItem(tmp);
+            delete tmp;
+        }
+        break;
+    case Qt::Key_P:
+        setPointMode = true;
         break;
     default:
         QGraphicsScene::keyPressEvent(keyEvent);
@@ -77,7 +94,7 @@ void Scene::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent) {
     QPointF lastPos = mouseEvent->lastScenePos();
     if(tmpPolygon) {
         QPolygonF tmp = tmpPolygon->getPolygon();
-        if(tmp.size()) {
+        if(tmp.size()>1) {
             tmp.pop_back();
             tmp.push_back(mouseEvent->scenePos());
             tmpPolygon->setPolygon(tmp);
@@ -85,18 +102,30 @@ void Scene::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent) {
     }
     else if(transformMode) {
         item->movex(pos.x()-lastPos.x());
+        item->applyTransform();
         item->movey(pos.y()-lastPos.y());
         item->applyTransform();
     }
     else if(rotateMode) {
-        qreal r = pos.x()-relationPoint.x();
-        qreal a = pos.y()-lastPos.y();
-        item->rotatefrompoint(relationPoint, a/r);
+        qreal x1 = pos.x()-relationPoint->getRelationPoint().x();
+        qreal x2 = lastPos.x()-relationPoint->getRelationPoint().x();
+        qreal y1 = pos.y()-relationPoint->getRelationPoint().y();
+        qreal y2 = lastPos.y()-relationPoint->getRelationPoint().y();
+        qreal angle = pointfrompoint(pos, lastPos)/pointfrompoint(relationPoint->getRelationPoint(), pos);
+        if(x1*y2-x2*y1>0)
+            item->rotatefrompoint(relationPoint->getRelationPoint(), -angle);
+        else
+            item->rotatefrompoint(relationPoint->getRelationPoint(), angle);
         item->applyTransform();
     }
     else if(scaleMode) {
-        item->resizefrompointx(relationPoint, 1+(pos.x()-lastPos.x())/(lastPos.x()-relationPoint.x()));
-        item->resizefrompointy(relationPoint, 1+(pos.y()-lastPos.y())/(lastPos.y()-relationPoint.y()));
+        qreal x = lastPos.x()-relationPoint->getRelationPoint().x();
+        qreal y = lastPos.y()-relationPoint->getRelationPoint().y();
+        if (x)
+            item->resizefrompointx(relationPoint->getRelationPoint(), 1+(pos.x()-lastPos.x())/x);
+        item->applyTransform();
+        if (y)
+            item->resizefrompointy(relationPoint->getRelationPoint(), 1+(pos.y()-lastPos.y())/y);
         item->applyTransform();
     }
     else {
@@ -105,7 +134,7 @@ void Scene::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent) {
 }
 
 void Scene::paintingEnable() {
-    transformMode = rotateMode = scaleMode = editMode = removeMode = false;
+    transformMode = rotateMode = scaleMode = editMode = removeMode = setPointMode = false;
     tmpPolygon = new Polyline(QPolygonF(), &editMode, &removeMode);
     this->addItem(tmpPolygon);
 }
@@ -119,21 +148,24 @@ void Scene::paintingDisable() {
     else {
         tmp.pop_back();
         tmpPolygon->setPolygon(tmp);
-        tmpPolygon->applyCenter();
     }
     tmpPolygon = nullptr;
 }
 
 void Scene::addCircle(int n, qreal radius) {
+    if (n<3 || !radius)
+        return;
     QPolygonF polygon;
-    for (int i=0; i<n+1; i++)
+    for (int i=0; i<n; i++)
         polygon << QPointF(radius*qCos(i*2*M_PI/n), radius*qSin(i*2*M_PI/n));
     addItem(new Polygon(polygon, &editMode, &removeMode));
 }
 
 void Scene::addRectangle(qreal a, qreal b) {
+    if (!a || !b)
+        return;
     QPolygonF polygon;
-    polygon << QPointF(-a/2, -b/2) << QPointF(-a/2, b/2) << QPointF(a/2, b/2) << QPointF(a/2, -b/2) << QPointF(-a/2, -b/2);
+    polygon << QPointF(-a/2, -b/2) << QPointF(-a/2, b/2) << QPointF(a/2, b/2) << QPointF(a/2, -b/2);
     addItem(new Polygon(polygon, &editMode, &removeMode));
 }
 
@@ -178,6 +210,7 @@ void Scene::readFromFile(QString path) {
         in >> type >> Matrix >> polygon;
         if (in.status() == QDataStream::ReadCorruptData) {
             this->clear();
+            this->addItem(relationPoint = new RelationPoint);
             return;
         }
         if (type)
@@ -185,4 +218,5 @@ void Scene::readFromFile(QString path) {
         else
             this->addItem(new Polygon(polygon, &editMode, &removeMode, Matrix));
     }
+    this->addItem(relationPoint = new RelationPoint);
 }

@@ -7,13 +7,14 @@ class SceneView : public QGraphicsView {
     Q_OBJECT
 protected:
     void wheelEvent(QWheelEvent *event);
+    void enterEvent(QEvent *event) {setFocus(), QWidget::enterEvent(event);}
+    void leaveEvent(QEvent *event) {clearFocus(), QWidget::leaveEvent(event);}
 public:
-    SceneView(QWidget *parent = nullptr) : QGraphicsView(parent) {this->setTransformationAnchor(QGraphicsView::AnchorUnderMouse);}
+    SceneView(QWidget *parent = nullptr) : QGraphicsView(parent) {this->setMouseTracking(true);}
     ~SceneView() = default;
 public slots:
     void addCircle();
     void addRect();
-    void removeItem();
     void saveImageToFile();
     void saveRowToFile();
     void readFromFile();

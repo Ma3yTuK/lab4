@@ -6,26 +6,258 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
-    <height>600</height>
+    <width>782</width>
+    <height>532</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
-  <widget class="QWidget" name="centralwidget"/>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QPushButton" name="Rect">
+    <property name="geometry">
+     <rect>
+      <x>266</x>
+      <y>9</y>
+      <width>80</width>
+      <height>26</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Rect</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="Save">
+    <property name="geometry">
+     <rect>
+      <x>340</x>
+      <y>90</y>
+      <width>80</width>
+      <height>26</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Save</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="Read">
+    <property name="geometry">
+     <rect>
+      <x>394</x>
+      <y>9</y>
+      <width>80</width>
+      <height>26</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Read</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="paintMode">
+    <property name="geometry">
+     <rect>
+      <x>40</x>
+      <y>80</y>
+      <width>88</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>paintMode</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="Circle">
+    <property name="geometry">
+     <rect>
+      <x>180</x>
+      <y>80</y>
+      <width>80</width>
+      <height>26</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Circle</string>
+    </property>
+   </widget>
+   <widget class="SceneView" name="View">
+    <property name="geometry">
+     <rect>
+      <x>60</x>
+      <y>180</y>
+      <width>591</width>
+      <height>261</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="Export">
+    <property name="geometry">
+     <rect>
+      <x>522</x>
+      <y>9</y>
+      <width>80</width>
+      <height>26</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Export</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="setColor">
+    <property name="geometry">
+     <rect>
+      <x>651</x>
+      <y>9</y>
+      <width>80</width>
+      <height>26</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>setColor</string>
+    </property>
+   </widget>
+  </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>800</width>
+     <width>782</width>
      <height>23</height>
     </rect>
    </property>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>SceneView</class>
+   <extends>QGraphicsView</extends>
+   <header>SceneView.h</header>
+   <slots>
+    <slot>addRect()</slot>
+    <slot>removeItem()</slot>
+    <slot>saveImageToFile()</slot>
+    <slot>saveRowToFile()</slot>
+    <slot>readFromFile()</slot>
+    <slot>setBackgroundColor()</slot>
+    <slot>paintMode(bool)</slot>
+    <slot>addCircle()</slot>
+   </slots>
+  </customwidget>
+ </customwidgets>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>Circle</sender>
+   <signal>clicked()</signal>
+   <receiver>View</receiver>
+   <slot>addCircle()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>69</x>
+     <y>65</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>327</x>
+     <y>438</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>Rect</sender>
+   <signal>clicked()</signal>
+   <receiver>View</receiver>
+   <slot>addRect()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>159</x>
+     <y>65</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>327</x>
+     <y>438</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>Export</sender>
+   <signal>clicked()</signal>
+   <receiver>View</receiver>
+   <slot>saveImageToFile()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>269</x>
+     <y>55</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>327</x>
+     <y>438</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>Save</sender>
+   <signal>clicked()</signal>
+   <receiver>View</receiver>
+   <slot>saveRowToFile()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>79</x>
+     <y>125</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>327</x>
+     <y>438</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>Read</sender>
+   <signal>clicked()</signal>
+   <receiver>View</receiver>
+   <slot>readFromFile()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>199</x>
+     <y>125</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>327</x>
+     <y>438</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>setColor</sender>
+   <signal>clicked()</signal>
+   <receiver>View</receiver>
+   <slot>setBackgroundColor()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>299</x>
+     <y>135</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>327</x>
+     <y>438</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>paintMode</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>View</receiver>
+   <slot>paintMode(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>70</x>
+     <y>204</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>327</x>
+     <y>438</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>
