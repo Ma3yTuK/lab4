@@ -80,6 +80,12 @@ void Scene::keyPressEvent(QKeyEvent *keyEvent) {
             delete tmp;
         }
         break;
+    case Qt::Key_V:
+        if (tmp) {
+            removeItem(tmp);
+            addItem(tmp);
+        }
+        break;
     case Qt::Key_P:
         setPointMode = true;
         break;
